@@ -1,25 +1,54 @@
 const form = document.getElementById("bookForm");
 const bookList = document.getElementById("bookList");
 
-form.addEventListener("submit", function(e) {
+// 👉 BOOK COLLECTION (MAIN STORAGE STRUCTURE)
+let books = JSON.parse(localStorage.getItem("books")) || [];
+
+// Load books when page opens
+window.onload = function () {
+    bookList.innerHTML = "";
+    books.forEach((book, index) => addBookToTable(book, index));
+};
+
+form.addEventListener("submit", function (e) {
     e.preventDefault();
 
-    const bookName = document.getElementById("bookName").value;
-    const author = document.getElementById("author").value;
+    const book = {
+        name: document.getElementById("bookName").value,
+        author: document.getElementById("author").value
+    };
 
-    const row = document.createElement("tr");
+    // 👉 Add book to collection
+    books.push(book);
 
-    row.innerHTML = `
-        <td>${bookName}</td>
-        <td>${author}</td>
-        <td><button onclick="deleteBook(this)">Delete</button></td>
-    `;
+    // Save to localStorage
+    localStorage.setItem("books", JSON.stringify(books));
 
-    bookList.appendChild(row);
-
+    addBookToTable(book, books.length - 1);
     form.reset();
 });
 
-function deleteBook(button) {
-    button.parentElement.parentElement.remove();
+// 👉 Add book to table UI
+function addBookToTable(book, index) {
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+        <td>${book.name}</td>
+        <td>${book.author}</td>
+        <td>
+            <button onclick="deleteBook(${index})">Delete</button>
+        </td>
+    `;
+
+    bookList.appendChild(row);
+}
+
+// 👉 Delete book from collection
+function deleteBook(index) {
+    books.splice(index, 1); // remove from array
+
+    localStorage.setItem("books", JSON.stringify(books));
+
+    // refresh UI
+    window.location.reload();
 }
